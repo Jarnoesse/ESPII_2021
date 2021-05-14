@@ -32,6 +32,8 @@ double Varianza(double array[],int lunghezza_array=30)
 
     varianza = varianza / (lunghezza_array-1);
 
+   varianza = sqrt(varianza);
+
     return varianza;
 
 }
