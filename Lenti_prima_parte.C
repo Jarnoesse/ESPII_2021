@@ -5,7 +5,6 @@
 #include<TCanvas.h>
 #include<TF1.h>
 #include<iomanip>
-// ciao jarno sto provando a modificare in github, adieu
 double Media(double array[],int lunghezza_array = 30)                 //aggiunta lunghezza array per problemi in Varianza
 {
   //Calcola la Media degli elementi degli array
