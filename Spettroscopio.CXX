@@ -1,4 +1,5 @@
 #include <cmath>
+#include <string.h>
 
 const int N = 300; // passo del reticolo mm^-1
 
@@ -13,40 +14,41 @@ double Media(double array[], int lunghezza_array = 3)
     return media;
 }
 
-class Dato
+struct Misura // Proviamo a vedere se così funziona
 {
-public:
-    double Gradi;
-    double Primi;
-    double Valore;
+    double valore;
+    double errore=0;
+};
 
-    void trasforma()
-    {
-        Valore = Gradi + Primi/60;
-    }
-
-}
 class Onda
 {
 public:
-    double banda_sx[3];
-    double banda_dx[3];
 
-    double lambda[3];
+    Misura angolo_sx[3];      //array di misure relativo all' angolo della banda sx
+    Misura angolo_dx[3];      //array di misure relativo all' angolo della banda dx
+    Misura lunghezza_onda[3]; //arraya che dovrebbe contenere il risultato dell operazione Calcola Lunghezza.
+    string colore;            //questo dovrebbe contenere il nome del colore che l'onda dovrebbe rappresentare
 
-    void Assegna_sx(Dato array[], int lunghezza_array =3)
+    void Assegna(double array_sx[], double array_dx[], int lunghezza_array=3)
     {
-        for(int i = 0; i < lunghezza_array;i++)
+        for(int i=0; i < lunghezza_array; i++)
         {
-            array[i].trasforma();
-            banda_sx[i] = array[i].Valore;
+             angolo_sx[i].valore = 360 - array_sx[i]; //semplice assegnazione dei valori applicata la correzione per l' angolo grande se no uscivo scemo
+             angolo_dx[i].valore = array_dx[i];
+             //VANNO AGGIUNTI GLI ERRORI NON DIMENTICARTELO
+             //AH E METTI GIA LA CONVERSIONE DEI GRADI QUI COSI HAI PIU PRECISIONE NEI DECIMALI
+             //QUINDI FORSE CAMBIA GLI ARRAY DA DOUBLE A MISURA
         }
     }
-
-    void Calcola()
+    void CalcolaLunghezza()
     {
+        for(int i=0;i<3;i++)
+        {
+            lunghezza_onda[i].valore = sin( abs( angolo_sx[i].valore - angolo_dx[i].valore )*3.14/360) / ((i+1)*N); //formula
+            lunghezza_onda[i].valore = lunghezza_onda[i].valore * 1.0E6;
 
-        for (int i=0; i<3; i++)lambda[i] = sin( abs(banda_dx[i]-banda_sx[i]) * 3.14 / 180 )/((i+1) * N);
+            std::cout << "finale " << colore << " " << lunghezza_onda[i].valore << "nm"  << endl;
+        }
     }
 
 };
@@ -55,6 +57,14 @@ public:
 
 double Spettroscopio()
 {
+    Onda Violetto;
+    Violetto.colore = "Violetto";
+
+    double sx[] = {353, 346.133,339.083};
+    double dx[] = {-6.908,-13.89,-21.125};
+
+    Violetto.Assegna(sx,dx); // per ora questo è un test!!!!
+    Violetto.CalcolaLunghezza();
 
 
 
