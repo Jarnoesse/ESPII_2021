@@ -1,6 +1,6 @@
 #include <cmath>
 
-double Interferometro()
+double Spettroscopio()
 {
 
     //PROVA GITHUB
