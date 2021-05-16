@@ -57,7 +57,7 @@ double Errore_media(double array[], int lunghezza_array=3)
 
     return errore;
 }
-void Grafico(TCanvas *canvas,TGraphErrors *grafico)
+void Grafico(TCanvas *canvas,TGraphErrors *grafico,TF1 *funzione)
 {
     canvas->SetFillColor(0);
     canvas->cd();
@@ -65,9 +65,15 @@ void Grafico(TCanvas *canvas,TGraphErrors *grafico)
     grafico->SetMarkerStyle(8);
     grafico->SetMarkerSize(1);
     grafico->SetTitle("Indice di Rifrazione del vetro");
-    grafico->GetXaxis()->SetTitle("Indice di Rifrazione");
-    grafico->GetYaxis()->SetTitle("Lunghezza d'onda [nm]");
+    grafico->GetYaxis()->SetTitle("Indice di Rifrazione");
+    grafico->GetXaxis()->SetTitle("Lunghezza d'onda [nm]");
+    grafico->GetXaxis()->SetLimits(380,630); // setto manualmente i limiti se no veniva troppo zoommato
+    grafico->GetYaxis()->SetLimits(1,2);
     grafico->Draw("AP");
+    grafico->Fit(funzione,"RM+");
+    std::cout <<"Chi^2= " << funzione->GetChisquare() << " P= " << funzione->GetProb() << endl;
+
+
 }
 
 
@@ -227,9 +233,12 @@ int ParteII(Prisma classe[],Reticolo reticolo[], double gradi[],double primi[],i
 
     }
 
-    TCanvas *canvas = new TCanvas("Indice di Rifrazione del vetro in funzione della frequenza","Indice di Rifrazione del vetro in funzione della frequenza",200,10,600,400);
-    TGraphErrors *grafico = new TGraphErrors(n_linee,indici,lunghezze_onda,errori_indici,errori_lunghezze_onda);
-    Grafico(canvas,grafico);
+    TCanvas *canvas       = new TCanvas("Indice di Rifrazione del vetro in funzione della frequenza","Indice di Rifrazione del vetro in funzione della frequenza",200,10,600,400);
+    TGraphErrors *grafico = new TGraphErrors(n_linee,lunghezze_onda,indici,errori_lunghezze_onda,errori_indici);
+    TF1 *funzione         = new TF1("funzione","[0]+[1]/(x^2)",400,700);
+    funzione->SetParameter(0,1.6700);
+    funzione->SetParameter(1,0.007);
+    Grafico(canvas,grafico,funzione);
 
     return 0;
 }
