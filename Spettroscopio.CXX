@@ -1,12 +1,18 @@
 #include <cmath>
 #include <string.h>
+#include<TGraphErrors.h>
+#include<TAxis.h>
+#include<TCanvas.h>
+#include<TF1.h>
+#include<iomanip>
 
-const int N = 300; // passo del reticolo mm^-1
-const double alpha = 1.047197551; // angolo del prisma alpha
+
+const int N = 300; // passo del reticolo mm^-1.
+const double alpha = 1.047197551; // angolo del prisma alpha, radianti.
 
 double Media(double array[], int lunghezza_array = 3)
 {
-    //Calcola la media
+    //Calcola la media.
     double media = 0;
 
     for(int i=0;i<lunghezza_array;i++) media = media + array[i];
@@ -17,7 +23,7 @@ double Media(double array[], int lunghezza_array = 3)
 }
 double Varianza(double array[],int lunghezza_array=3)
 {
-    //Calcola la varianza dato un array
+    //Calcola la varianza dato un array.
     double varianza = 0;
 
 
@@ -42,7 +48,7 @@ int FindMax(int array[],int lunghezza = 7)
 }
 double Errore_media(double array[], int lunghezza_array=3)
 {
-    //questa funzione è anta dal fatto che non mi piaceva vedere il calcolo fatto a linea, così è molto più elegante
+    //questa funzione è anta dal fatto che non mi piaceva vedere il calcolo fatto a linea, così è molto più elegante.
     double errore;
 
     for(int i=0; i< lunghezza_array; i++) errore = errore + array[i];
@@ -51,9 +57,22 @@ double Errore_media(double array[], int lunghezza_array=3)
 
     return errore;
 }
+void Grafico(TCanvas *canvas,TGraphErrors *grafico)
+{
+    canvas->SetFillColor(0);
+    canvas->cd();
+
+    grafico->SetMarkerStyle(8);
+    grafico->SetMarkerSize(1);
+    grafico->SetTitle("Indice di Rifrazione del vetro");
+    grafico->GetXaxis()->SetTitle("Indice di Rifrazione");
+    grafico->GetYaxis()->SetTitle("Lunghezza d'onda [nm]");
+    grafico->Draw("AP");
+}
 
 
-struct Misura // Proviamo a vedere se così funziona
+
+struct Misura // Proviamo a vedere se così funziona.
 {
     double valore;
     double errore=0;
@@ -63,10 +82,10 @@ class Reticolo
 {
 public:
 
-    Misura angolo_sx[3];      //array di misure relativo all' angolo della banda sx
-    Misura angolo_dx[3];      //array di misure relativo all' angolo della banda dx
+    Misura angolo_sx[3];      //array di misure relativo all' angolo della banda sx.
+    Misura angolo_dx[3];      //array di misure relativo all' angolo della banda dx.
     Misura lunghezza_onda;    //array che dovrebbe contenere il risultato dell operazione Calcola Lunghezza.
-    string colore;            //questo dovrebbe contenere il nome del colore che l'onda dovrebbe rappresentare
+    string colore;            //questo dovrebbe contenere il nome del colore che l'onda dovrebbe rappresentare.
     string ordine[3] = {"primo ordine", "secondo ordine", "terzo ordine"};
 
     void Assegna(double gradi_sx[],double primi_sx[], double gradi_dx[],double primi_dx[], int lunghezza_array=3)
@@ -74,7 +93,7 @@ public:
         for(int i=0; i < lunghezza_array; i++)
         {
 
-             angolo_sx[i].valore = gradi_sx[i] + primi_sx[i]/60 - 360; //semplice assegnazione dei valori applicata la correzione per l' angolo grande se no uscivo scemo
+             angolo_sx[i].valore = gradi_sx[i] + primi_sx[i]/60 - 360; //semplice assegnazione dei valori applicata la correzione per l' angolo grande se no uscivo scemo.
              angolo_dx[i].valore = gradi_dx[i] + primi_dx[i]/60;
         }
     }
@@ -85,8 +104,8 @@ public:
 
         for(int i=0;i<3;i++)
         {
-            lunghezza_onda_temp[i] = sin( abs( angolo_sx[i].valore - angolo_dx[i].valore )*3.1415/360) / ((i+1)*N); //formula
-            lunghezza_onda_temp[i] = lunghezza_onda_temp[i] * 1.0E6;                                                //riscalo per i nanometri che sono meglio se si parla di lunghezze d'onda
+            lunghezza_onda_temp[i] = sin( abs( angolo_sx[i].valore - angolo_dx[i].valore )*3.1415/360) / ((i+1)*N); //formula.
+            lunghezza_onda_temp[i] = lunghezza_onda_temp[i] * 1.0E6;                                                //riscalo per i nanometri che sono meglio se si parla di lunghezze d'onda.
 
             errore[i] = sqrt( pow( cos(abs( angolo_sx[i].valore - angolo_dx[i].valore )*3.1415/360 )*3.1415/((i+1)*N*360),2)*pow(0.5,2));
             errore[i] = errore[i] * 1.0E6;
@@ -95,8 +114,8 @@ public:
 
         }
         lunghezza_onda.valore = Media(lunghezza_onda_temp);
-        lunghezza_onda.errore = Errore_media(errore);                                                                     // l'idea era propagare l'errore della media
-        if (lunghezza_onda.errore < Varianza(lunghezza_onda_temp)) lunghezza_onda.errore = Varianza(lunghezza_onda_temp); // semplice verifica se l'errore da propagazione è maggiore della varianza
+        lunghezza_onda.errore = Errore_media(errore);                                                                     // l'idea era propagare l'errore della media.
+        if (lunghezza_onda.errore < Varianza(lunghezza_onda_temp)) lunghezza_onda.errore = Varianza(lunghezza_onda_temp); // semplice verifica se l'errore da propagazione è maggiore della varianza.
 
 
         std::cout << endl << "MISURA FINALE " << colore << " "  << lunghezza_onda.valore<<" +- " << lunghezza_onda.errore << "nm"  << endl << endl;
@@ -128,7 +147,8 @@ public:
     void CalcolaIndice()
     {
         indice_di_rifrazione.valore = sin( (angolo_deviazione_minima.valore + alpha)/2 ) / sin(alpha/2);
-        indice_di_rifrazione.errore = 0; //AGGIUNGERE ERRORE !!!!!!!!!!!!!!
+        indice_di_rifrazione.errore = sqrt(pow(0.5*cos((angolo_deviazione_minima.valore + alpha)/2) / sin(alpha/2),2)*pow(0.5,2)+pow(0.5*1/sin(alpha/2)*(cos((angolo_deviazione_minima.valore+alpha)/2)-1/tan(alpha/2)*sin((angolo_deviazione_minima.valore+alpha)/2)),2)*pow(0.2,2));
+                std::cout<<"Indice di rifrazione " << indice_di_rifrazione.valore << " pm " << indice_di_rifrazione.errore << endl << endl;
     }
 
 };
@@ -136,13 +156,13 @@ public:
 int ParteI(Reticolo classe[], double sx_gradi[], double sx_primi[], double dx_gradi[], double dx_primi[],string nomi[], int  n_linee = 7,int dimensione_array = 21, int dimensione_batch = 3)
 {
     std::cout << "--PRIMA PARTE--" << endl << endl;
-    double batch_sx_gradi[dimensione_batch]; // non è memory friendly ma almeno nel main non ho 200 array
+    double batch_sx_gradi[dimensione_batch]; // non è memory friendly ma almeno nel main non ho 200 array.
     double batch_dx_gradi[dimensione_batch];
     double batch_sx_primi[dimensione_batch];
     double batch_dx_primi[dimensione_batch];
-    int k=0;                                //indice che si muove sull' array grande
+    int k=0;                                //indice che si muove sull' array grande.
 
-    for(int i=0;i < n_linee;i++)            //mi muovo sulle classi
+    for(int i=0;i < n_linee;i++)            //mi muovo sulle classi.
     {
         for(int j=0; j < dimensione_batch; j++)
         {
@@ -158,7 +178,7 @@ int ParteI(Reticolo classe[], double sx_gradi[], double sx_primi[], double dx_gr
     }
     return 0;
 }
-int ParteII(Prisma classe[], double gradi[],double primi[],int lunghezze_misure[],int n_linee,string nomi[])
+int ParteII(Prisma classe[],Reticolo reticolo[], double gradi[],double primi[],int lunghezze_misure[],int n_linee,string nomi[])
 {
     std::cout << "--SECONDA PARTE--" << endl << endl;
     int max = FindMax(lunghezze_misure);
@@ -180,6 +200,36 @@ int ParteII(Prisma classe[], double gradi[],double primi[],int lunghezze_misure[
 
 
     }
+    double indici[n_linee];
+    double errori_indici[n_linee];
+    double lunghezze_onda[n_linee];
+    double errori_lunghezze_onda[n_linee];
+    k=0;
+
+    for(int i=0; i < n_linee;i++)
+    {
+        if(i==4)
+        {
+            indici[i]         = classe[i].indice_di_rifrazione.valore;
+            errori_indici[i]  = classe[i].indice_di_rifrazione.errore;
+            lunghezze_onda[i] = reticolo[k].lunghezza_onda.valore;
+            errori_lunghezze_onda[i] = reticolo[k].lunghezza_onda.errore;
+            k=k+2;
+        }
+        else
+        {
+            indici[i]         = classe[i].indice_di_rifrazione.valore;
+            errori_indici[i]  = classe[i].indice_di_rifrazione.errore;
+            lunghezze_onda[i] = reticolo[k].lunghezza_onda.valore;
+            errori_lunghezze_onda[i] = reticolo[k].lunghezza_onda.errore;
+            k++;
+        }
+
+    }
+
+    TCanvas *canvas = new TCanvas("Indice di Rifrazione del vetro in funzione della frequenza","Indice di Rifrazione del vetro in funzione della frequenza",200,10,600,400);
+    TGraphErrors *grafico = new TGraphErrors(n_linee,indici,lunghezze_onda,errori_indici,errori_lunghezze_onda);
+    Grafico(canvas,grafico);
 
     return 0;
 }
@@ -208,7 +258,7 @@ double Spettroscopio()
     double gradi[] = {308,308,308,308, 309,309,309, 310,310,310, 311,311,311, 311,311,311, 312,312,312};
     double primi[] = {46,58,51,19, 43,44,45, 50,49,49, 30,30,30, 49,48,49, 10,11,11}; //maggiore errrore nella prima riconducibile al mio occhio che non si era ancora abituato?
 
-    ParteII(LineaII,gradi,primi,lunghezze_array,n_linee,nomiII);
+    ParteII(LineaII,LineaI,gradi,primi,lunghezze_array,n_linee,nomiII);
 
 
 
