@@ -1,4 +1,4 @@
-// INTERFEROMETRO di MICHELSON-MORLEY
+// POLARIMETRO
 /*Strumentazione:
 - lampada al Sodio
 - Amperometro: AMPROBE 30XR-A
