@@ -102,10 +102,19 @@ void polaris(){
   //------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   cout << "\n2. LEGGE di MALUS\n";
-  const int N = 37;
+
+  //const int N = 37;
+  const int N = 36;
+  //const int N = 35;
+
   double deg[N] = {}; // [rad]
   double degerr[N] = {};
-  double I[] = {5.7, 8.3, 10.9, 13.8, 16.5, 18.5, 19.9, 19.7, 18.4, 16.5, 13.8, 11.1, 8.4, 5.8, 4.1, 3., 2.6, 3.8, 6., 8.8, 12.4, 15.2, 17.7, 19.8, 20.8, 20.7, 19.4, 17.4, 14.5, 11.4, 8.3, 5.6, 3.6, 2.6, 2.8, 3.9, 5.8}; // [uA] corrente da fotodiodo
+
+  //elenco dei set di misure di I
+  //double I[] = {5.7, 8.3, 10.9, 13.8, 16.5, 18.5, 19.9, 19.7, 18.4, 16.5, 13.8, 11.1, 8.4, 5.8, 4.1, 3., 2.6, 3.8, 6., 8.8, 12.4, 15.2, 17.7, 19.8, 20.8, 20.7, 19.4, 17.4, 14.5, 11.4, 8.3, 5.6, 3.6, 2.6, 2.8, 3.9, 5.8}; // [uA] corrente da fotodiodo
+  double I[] = {10.3, 9.6, 9.4, 9.3, 9.8, 10.4, 11.1, 11.9, 12.6, 13.2, 13.5, 13.7, 13.7, 13.4, 12.8, 12., 11.3, 10.5, 9.9, 9.5, 9.3, 9.4, 9.8, 10.4, 11.1, 11.9, 12.6, 13.2, 13.6, 13.7, 13.6, 13.1, 12.6, 11.9, 11.1, 10.7}; // [uA] set2
+  //double I[] = {5.1, 4.5, 3.9, 3.4, 3.1, 3., 3., 3.4, 3.9, 4., 4., 5., 5.6, 6.1, 6.4, 6.5, 6.7, 6.4, 5.8, 5.3, 4.8, 4.2, 3.6, 3.3, 3.3, 3.6, 4.1, 4.7, 5.1, 5.5, 5.9, 6.1, 6.3, 6.4, 5.8, 5.6}; // [uA] set3 dovrebbe essere quello senza sistematico ma le misure sono incomplete
+
   double Ierr[N] = {};
   for (int i = 0; i < N; ++i){
     deg[i] = degtorad(10. * i);
@@ -115,72 +124,30 @@ void polaris(){
 
   // GRAFICO I(deg)
   TCanvas* cIdeg = new TCanvas("cIdeg", "cIdeg", 200, 10, 600, 400);
-	cIdeg->SetFillColor(0);
+  cIdeg->SetFillColor(0);
   cIdeg->SetGrid();
-	cIdeg->cd();
-	TGraphErrors* gIdeg = new TGraphErrors(N, deg, I, degerr, Ierr);
-	gIdeg->SetMarkerSize(0.6);
-	gIdeg->SetMarkerStyle(21);
-	gIdeg->SetTitle("I(#theta)");
-	gIdeg->GetXaxis()->SetTitle("#theta [rad]");
-	gIdeg->GetYaxis()->SetTitle("I [#muA]");
-	gIdeg->Draw("AP");
+  cIdeg->cd();
+  TGraphErrors* gIdeg = new TGraphErrors(N, deg, I, degerr, Ierr);
+  gIdeg->SetMarkerSize(0.6);
+  gIdeg->SetMarkerStyle(21);
+  gIdeg->SetTitle("Legge di Malus I(#theta)");
+  gIdeg->GetXaxis()->SetTitle("#theta [rad]");
+  gIdeg->GetYaxis()->SetTitle("I [#muA]");
+  gIdeg->Draw("AP");
 
   //FIT I = I0 * cos^2(theta)
-	TF1* Ideg = new TF1("Ideg", "[0] * pow(cos(x + [1]), 2) + [2]", min(N, deg), max(N, deg));
-	Ideg->SetParameter(0, max(N, I));
-	Ideg->SetParameter(1, 0);
+  TF1* Ideg = new TF1("Ideg", "[0] * pow(cos(x + [1]), 2) + [2]", min(N, deg)-0.15, max(N, deg));
+  Ideg->SetParameter(0, max(N, I));
+  Ideg->SetParameter(1, 0);
   Ideg->SetParameter(2, 0);
-	//Ideg->SetParLimits(0, 0, );
-	//Ideg->SetParLimits(1, 0, 1);
+  //Ideg->SetParLimits(0, 0, );
+  //Ideg->SetParLimits(1, 0, 1);
   //Ideg->SetParLimits(2, 0, 1);
   Ideg->SetLineColor(2);
-	gIdeg->Fit(Ideg, "RMS+");
-	cIdeg->Print("legge_di_Malus.png");
+  gIdeg->Fit(Ideg, "RMS+");
+  //cIdeg->Print("legge_di_Malus_SET1.png");
+  cIdeg->Print("legge_di_Malus_SET2.png");
+  //cIdeg->Print("legge_di_Malus_SET3.png");
 
-	cout << "Chi^2: " << Ideg->GetChisquare() << ", number of DoF: " << Ideg->GetNDF() << " (Probability: " << Ideg->GetProb() << ").\n" << endl;
-
-  //------------------------------------------------------------------------------------------------------------------------------------------------------------
-/*
-  cout << "\n3. RIFO LEGGE di MALUS\n";
-  const int N1 = 36;
-  double deg1[N1] = {}; // [rad]
-  double deg1err[N1] = {};
-  double I1[] = {5.7, 8.3, 10.9, 13.8, 16.5, 18.5, 19.9, 19.7, 18.4, 16.5, 13.8, 11.1, 8.4, 5.8, 4.1, 3., 2.6, 3.8, 6., 8.8, 12.4, 15.2, 17.7, 19.8, 20.8, 20.7, 19.4, 17.4, 14.5, 11.4, 8.3, 5.6, 3.6, 2.6, 2.8, 3.9, 5.8}; // [uA] corrente da fotodiodo
-  double I1err[N] = {};
-  for (int i = 0; i < N1; ++i){
-    deg[i] = degtorad(10. * i);
-    degerr[i] = degtorad(1.); // con 2. probfit quadra
-    Ierr[i] = 1.5e-2 * I[i] + 0.1; // con 2. o 2.5 probfit quadra
-  }
-
-  // GRAFICO I(deg)
-  TCanvas* cIdeg1 = new TCanvas("cIdeg1", "cIdeg1", 200, 10, 600, 400);
-	cIdeg1->SetFillColor(0);
-  cIdeg1->SetGrid();
-	cIdeg1->cd();
-	TGraphErrors* gIdeg1 = new TGraphErrors(N1, deg1, I1, deg1err, I1err);
-	gIdeg1->SetMarkerSize(0.6);
-	gIdeg1->SetMarkerStyle(21);
-	gIdeg1->SetTitle("I(#theta) ");
-	gIdeg1->GetXaxis()->SetTitle("#theta [rad]");
-	gIdeg1->GetYaxis()->SetTitle("I [#muA]");
-	gIdeg1->Draw("AP");
-
-  //FIT I = I0 * cos^2(theta)
-	TF1* Ideg = new TF1("Ideg", "[0] * pow(cos(x + [1]), 2) + [2]", min(N, deg), max(N, deg));
-	Ideg->SetParameter(0, max(N, I));
-	Ideg->SetParameter(1, 0);
-  Ideg->SetParameter(2, 0);
-	//Ideg->SetParLimits(0, 0, );
-	//Ideg->SetParLimits(1, 0, 1);
-  //Ideg->SetParLimits(2, 0, 1);
-  Ideg->SetLineColor(2);
-	gIdeg->Fit(Ideg, "RMS+");
-	cIdeg->Print("legge_di_Malus.png");
-
-	cout << "Chi^2: " << Ideg->GetChisquare() << ", number of DoF: " << Ideg->GetNDF() << " (Probability: " << Ideg->GetProb() << ").\n" << endl;
-
-  //------------------------------------------------------------------------------------------------------------------------------------------------------------
-*/
+  cout << "Chi^2: " << Ideg->GetChisquare() << ", number of DoF: " << Ideg->GetNDF() << " (Probability: " << Ideg->GetProb() << ").\n" << endl;
 }
