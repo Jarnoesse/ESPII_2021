@@ -146,6 +146,7 @@ public:
         }
         angolo_deviazione_minima.valore = Media(angolo,lunghezza_array);
         angolo_deviazione_minima.errore = Varianza(angolo,lunghezza_array);
+        //angolo_deviazione_minima.errore = 0;
 
         std::cout << nome << " " << angolo_deviazione_minima.valore << " pm " << angolo_deviazione_minima.errore << endl << endl;
 
@@ -153,7 +154,7 @@ public:
     void CalcolaIndice()
     {
         indice_di_rifrazione.valore = sin( (angolo_deviazione_minima.valore + alpha)/2 ) / sin(alpha/2);
-        indice_di_rifrazione.errore = sqrt(pow(0.5*cos((angolo_deviazione_minima.valore + alpha)/2) / sin(alpha/2),2)*pow(0.5,2)+pow(0.5*1/sin(alpha/2)*(cos((angolo_deviazione_minima.valore+alpha)/2)-1/tan(alpha/2)*sin((angolo_deviazione_minima.valore+alpha)/2)),2)*pow(0.2,2));
+        indice_di_rifrazione.errore = sqrt(pow(0.5*cos((angolo_deviazione_minima.valore + alpha)/2) / sin(alpha/2),2)*pow(angolo_deviazione_minima.errore,2)+pow(0.5*1/sin(alpha/2)*(cos((angolo_deviazione_minima.valore+alpha)/2)-1/tan(alpha/2)*sin((angolo_deviazione_minima.valore+alpha)/2)),2)*pow(1/60,2));
                 std::cout<<"Indice di rifrazione " << indice_di_rifrazione.valore << " pm " << indice_di_rifrazione.errore << endl << endl;
     }
 
@@ -237,7 +238,7 @@ int ParteII(Prisma classe[],Reticolo reticolo[], double gradi[],double primi[],i
     TGraphErrors *grafico = new TGraphErrors(n_linee,lunghezze_onda,indici,errori_lunghezze_onda,errori_indici);
     TF1 *funzione         = new TF1("funzione","[0]+[1]/(x^2)",400,700);
     funzione->SetParameter(0,1.6700);
-    funzione->SetParameter(1,0.007);
+    funzione->SetParameter(1,743);
     Grafico(canvas,grafico,funzione);
 
     return 0;
