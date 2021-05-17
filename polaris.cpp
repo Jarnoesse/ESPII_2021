@@ -141,7 +141,7 @@ void polaris(){
 	cout << "Chi^2: " << Ideg->GetChisquare() << ", number of DoF: " << Ideg->GetNDF() << " (Probability: " << Ideg->GetProb() << ").\n" << endl;
 
   //------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+/*
   cout << "\n3. RIFO LEGGE di MALUS\n";
   const int N1 = 36;
   double deg1[N1] = {}; // [rad]
@@ -182,5 +182,5 @@ void polaris(){
 	cout << "Chi^2: " << Ideg->GetChisquare() << ", number of DoF: " << Ideg->GetNDF() << " (Probability: " << Ideg->GetProb() << ").\n" << endl;
 
   //------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+*/
 }
