@@ -4,7 +4,13 @@
 #include<TAxis.h>
 #include<TCanvas.h>
 #include<TF1.h>
+#include<TH1F.h>
 #include<iomanip>
+#include<TRandom3.h>
+#include<TMath.h>
+#include<TLegend.h>
+#include<string>
+
 double Media(double array[],int lunghezza_array = 30)                 //aggiunta lunghezza array per problemi in Varianza
 {
   //Calcola la Media degli elementi degli array
@@ -36,14 +42,14 @@ double Varianza(double array[],int lunghezza_array=30)
     return varianza;
 
 }
-double FindMax(double array[],int dimensione)
+double FindMax(double array[],int dimensione=30)
 {
     double max=array[0];
     for(int i =1; i< dimensione; i++)if(array[i] > max) max = array[i];
 
     return max;
 }
-double FindMin(double array[],int dimensione)
+double FindMin(double array[],int dimensione=30)
 {
     double min=array[0];
     for(int i =1; i< dimensione; i++)if(array[i] < min) min = array[i];
@@ -175,10 +181,102 @@ void Metodo_Variazionale(double dati[],double risultati[],double distanze_lenti[
 
 
 }
+void IsGaussian(double misure[],char nome[],bool multifunc = false, int lunghezza_array = 30, int nbins = 10)
+{
+    double media = Media(misure);
+
+     TH1 *istogramma = new TH1D("h1","h1",nbins,FindMin(misure)-5,FindMax(misure)+5);
+
+    for(int i=0;i < lunghezza_array; i++)
+    {
+        istogramma->Fill(misure[i]);                              // inserisco i valori nell' istogramma
+    }
+
+    TCanvas *canvas = new TCanvas(nome,nome,200,10,600,400); //Creo il canvas
+
+    TF1 *gauss = new TF1("gauss","gaus",FindMin(misure)-5,FindMax(misure)+5);
+    TF1 *multigauss1 = new TF1("multigauss","gaus",FindMin(misure)-5,media);
+    TF1 *multigauss2 = new TF1("multigauss2","gaus",media,FindMax(misure)+5);
+    TF1 *somma = new TF1("somma","gaus(0)+gaus(3)",FindMin(misure)-5,FindMax(misure)+5);
+
+    canvas->SetFillColor(0);
+    canvas->cd();
+
+    if(multifunc == false)
+    {
+        gauss->SetParameter(1,media);
+        istogramma->Draw();
+        istogramma->Fit(gauss,"R+");
+        std::cout << "Fit gaussiano P=" << gauss->GetProb()<<endl<<endl;
+    }
+    else
+    {
+        multigauss1->SetParameter(1,1070);
+        multigauss2->SetParameter(1,1045);
+        istogramma->Draw();
+        istogramma->Fit(multigauss1,"R+");
+        istogramma->Fit(multigauss2,"R+");
+
+        Double_t par[6];
+        multigauss1->GetParameters(&par[0]);
+        multigauss2->GetParameters(&par[3]);
+        somma->SetParameters(par);
+        istogramma->Fit(somma,"R+");
+        std::cout << "Fit gaussiano1 P=" << somma->GetProb()<<endl;
+    }
+}
+/*
+void tStudent(int numeroEsperimenti, int neventi, const double & nbins = 40, const double& minb = -10, const double& maxb = 10) {
+
+  // valor vero e sigma
+  double valor_vero  = 235;
+  double sigma = 5;
+
+  // --------------------------------------------------------- //
+
+  // Generatore di eventi casuali (http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/ARTICLES/mt.pdf)
+  TRandom3 *random = new TRandom3();
+
+  double variabili_t[numeroEsperimenti];
+
+  // Referenza calcolo varianza in un passaggio: http://www.jstor.org/stable/1266577?seq=1#page_scan_tab_contents
+  for (int esp = 0; esp < numeroEsperimenti; ++esp){
+    double delta = 0.;
+    double media = 0.;
+    double M2    = 0.;
+    for (int i=0; i<neventi; ++i){
+      double d = random->Gaus(valor_vero,sigma);
+      delta = d - media;
+      media += delta/(i+1);
+      M2    += delta*(d-media);
+    }
+    double std = neventi > 1 ? sqrt(M2/(neventi-1)) : -9.;
+    variabili_t[esp] = (media - valor_vero)/(std/sqrt(neventi));
+    // Se anziché usare la deviazione standard campionaria si usasse la deviazione standard vera, allora t si distribuirebbe secondo la statistica di
+    // Gauss anche per poche misure. Per verificarlo, provare a usare la riga qui sotto anziché quella sopra.
+    // variabili_t[esp] = (media - valor_vero)/(sigma/sqrt(neventi));
+  }
+
+  TCanvas *ct = new TCanvas("t","t",200,10,600,400);
+  ct->cd();
+
+  // Istanza dell'oggetto istogramma (https://root.cern.ch/doc/master/classTH1F.html)
+  TH1F *htStudent = new TH1F("sStudent","tStudent",nbins, minb, maxb);
+  htStudent->SetStats(kFALSE);
+  htStudent->GetXaxis()->SetTitle("t");
+  htStudent->GetYaxis()->SetTitle("Conteggi");
+
+  for(int esp=0; esp<numeroEsperimenti;++esp)
+    htStudent->Fill(variabili_t[esp]);
 
 
+  htStudent->Draw();
+  htStudent->Fit("gaus","ME");
+  TF1 *fit = htStudent->GetFunction("gaus");
+  std::cout << "Chi^2:" << fit->GetChisquare() << ", number of DoF: " << fit->GetNDF() << " (Probability: " << fit->GetProb() << ")." << endl;
+}
 
-
+*/
 
 int Lenti_prima_parte()
 {
@@ -191,6 +289,13 @@ int Lenti_prima_parte()
 
    double Q1[] = {1060,1045,1038,1081,1060,1064,1058,1070,1075,1053,1056,1057,1062,1053,1040,1059,1054,1046,1068,1058,1040,1066,1070,1067,1048,1066,1037,1087,1051,1069};
    double Q2[] = {1036,1046,1039,1047,1068,1081,1050,1049,1062,1068,1044,1036,1069,1038,1071,1058,1065,1041,1057,1064,1072,1054,1069,1040,1074,1052,1064,1072,1070,1076};
+
+   char nome1[] = {'I','s','t','o','g','r','a','m','m','a'}; // non mi da errore negli hist
+   char nome2[] = {'S','e','c','o','n','d','o',};
+
+   IsGaussian(Q1,nome1,false,30,8);
+
+   IsGaussian(Q2,nome2,true,30,9);
 
 
     double distanza_focale = Distanza_Focale(distanza_sorgente,distanza_lenti,Q1);
@@ -216,6 +321,7 @@ int Lenti_prima_parte()
     double distanze_lenti_parte_2[] = {480,490,470,465,475,430,485};
 
     Metodo_Variazionale(Q4,risultati,distanze_lenti_parte_2,300);
+
 
 
     return 0;
