@@ -8,7 +8,7 @@
 
 
 const int N = 300; // passo del reticolo mm^-1.
-const double alpha = 1.047197551; // angolo del prisma alpha, radianti.
+const double ALPHA = 1.047197551; // angolo del prisma alpha, radianti.
 
 double Media(double array[], int lunghezza_array = 3)
 {
@@ -84,6 +84,8 @@ struct Misura // Proviamo a vedere se così funziona.
     double errore=0;
 };
 
+
+
 class Reticolo
 {
 public:
@@ -91,6 +93,7 @@ public:
     Misura angolo_sx[3];      //array di misure relativo all' angolo della banda sx.
     Misura angolo_dx[3];      //array di misure relativo all' angolo della banda dx.
     Misura lunghezza_onda;    //array che dovrebbe contenere il risultato dell operazione Calcola Lunghezza.
+    Misura alpha;             //Lo dichiaro come misura.
     string colore;            //questo dovrebbe contenere il nome del colore che l'onda dovrebbe rappresentare.
     string ordine[3] = {"primo ordine", "secondo ordine", "terzo ordine"};
 
@@ -119,6 +122,7 @@ public:
             std::cout << colore << " " << ordine[i] << " " << lunghezza_onda_temp[i] <<" +- " << errore[i] << "nm"  << endl;
 
         }
+
         lunghezza_onda.valore = Media(lunghezza_onda_temp);
         lunghezza_onda.errore = Errore_media(errore);                                                                     // l'idea era propagare l'errore della media.
         if (lunghezza_onda.errore < Varianza(lunghezza_onda_temp)) lunghezza_onda.errore = Varianza(lunghezza_onda_temp); // semplice verifica se l'errore da propagazione è maggiore della varianza.
@@ -134,6 +138,7 @@ class Prisma
 public:
     Misura angolo_deviazione_minima;
     Misura indice_di_rifrazione;
+    Misura alpha;
     string nome;
 
     void Assegna(double gradi[],double primi[], int lunghezza_array=3)
@@ -146,15 +151,17 @@ public:
         }
         angolo_deviazione_minima.valore = Media(angolo,lunghezza_array);
         angolo_deviazione_minima.errore = Varianza(angolo,lunghezza_array);
-        //angolo_deviazione_minima.errore = 0;
 
         std::cout << nome << " " << angolo_deviazione_minima.valore << " pm " << angolo_deviazione_minima.errore << endl << endl;
+
+        alpha.valore = ALPHA;
+        alpha.errore = 1/60;
 
     }
     void CalcolaIndice()
     {
-        indice_di_rifrazione.valore = sin( (angolo_deviazione_minima.valore + alpha)/2 ) / sin(alpha/2);
-        indice_di_rifrazione.errore = sqrt(pow(0.5*cos((angolo_deviazione_minima.valore + alpha)/2) / sin(alpha/2),2)*pow(angolo_deviazione_minima.errore,2)+pow(0.5*1/sin(alpha/2)*(cos((angolo_deviazione_minima.valore+alpha)/2)-1/tan(alpha/2)*sin((angolo_deviazione_minima.valore+alpha)/2)),2)*pow(1/60,2));
+        indice_di_rifrazione.valore = sin( (angolo_deviazione_minima.valore + alpha.valore)/2 ) / sin(alpha.valore/2);
+        indice_di_rifrazione.errore = sqrt(pow(0.5*cos((angolo_deviazione_minima.valore + alpha.valore)/2) / sin(alpha.valore/2),2)*pow(angolo_deviazione_minima.errore,2)+pow(0.5*1/sin(alpha.valore/2)*(cos((angolo_deviazione_minima.valore+alpha.valore)/2)-1/tan(alpha.valore/2)*sin((angolo_deviazione_minima.valore+alpha.valore)/2)),2)*pow(alpha.errore,2));
                 std::cout<<"Indice di rifrazione " << indice_di_rifrazione.valore << " pm " << indice_di_rifrazione.errore << endl << endl;
     }
 
