@@ -189,7 +189,7 @@ void Metodo_Variazionale(double dati[],double distanze_lenti[], double distanza_
         e0 = e0/pow(p0,2);
         p0 = 1/p0;
 
-        std::cout << endl << "LA FOCALE DELLA LENTE BICONVESSA E'" << p0 << " +- " << e0 << " mm" endl;
+        std::cout << endl << "LA FOCALE DELLA LENTE BICONVESSA E'" << p0 << " +- " << e0 << " mm" << endl;
 
         focale = p0;
         errore_focale = e0;
