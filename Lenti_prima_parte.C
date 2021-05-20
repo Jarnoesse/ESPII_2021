@@ -159,21 +159,21 @@ void Metodo_Variazionale(double dati[],double distanze_lenti[], double distanza_
     canvas->cd();
 
     //Creo il grafico
-    TGraphErrors *grafico = new TGraphErrors(lunghezza_array_2, distanza_lenti, medie , errori_distanza_lenti,varianze);
+    TGraphErrors *grafico = new TGraphErrors(lunghezza_array_2,medie,distanza_lenti,varianze,errori_distanza_lenti);
 
     //Setto il grafico
     grafico->SetMarkerStyle(8);
     grafico->SetMarkerSize(1);
 
     grafico->SetTitle("Metodo Variazionale");
-    grafico->GetXaxis()->SetTitle("Distanza Lenti[mm]");
-    grafico->GetYaxis()->SetTitle("Distanza del fuoco [mm]");
+    grafico->GetXaxis()->SetTitle("1/s [mm^-1]");
+    grafico->GetYaxis()->SetTitle("1/s' [mm^-1]");
 
     grafico->Draw("AP");
 
 
 
-    TF1 *funzione = new TF1("funzione","[0]+[1]*x",FindMin(distanza_lenti,lunghezza_array_2), FindMax(distanza_lenti,lunghezza_array_2));
+    TF1 *funzione = new TF1("funzione","[0]+[1]*x",FindMin(medie,lunghezza_array_2), FindMax(medie,lunghezza_array_2));
 
         funzione->SetParameter(1,-1);
 
@@ -186,10 +186,11 @@ void Metodo_Variazionale(double dati[],double distanze_lenti[], double distanza_
 
     if(parte == false)
     {
+        grafico->SetTitle("1/s'(1/s) Lente biconvessa");
         e0 = e0/pow(p0,2);
         p0 = 1/p0;
 
-        std::cout << endl << "LA FOCALE DELLA LENTE BICONVESSA E'" << p0 << " +- " << e0 << " mm" endl;
+        std::cout << endl << "LA FOCALE DELLA LENTE BICONVESSA E'" << p0 << " +- " << e0 << " mm" << endl;
 
         focale = p0;
         errore_focale = e0;
@@ -197,7 +198,7 @@ void Metodo_Variazionale(double dati[],double distanze_lenti[], double distanza_
     }
     else
     {
-
+        grafico->SetTitle("1/s'(1/s) Sistema ottico di due lenti");
         std::cout << "test" <<p0-1/focale;
         double errore_risultato = sqrt(pow(1/(p0+1/focale),2)*pow(e0,2)+pow(1/pow(p0*focale+1,2),2)*pow(errore_focale,2));
         double risultato = 1/(p0 - 1/focale);
@@ -227,20 +228,25 @@ void IsGaussian(double misure[],char nome[],bool multifunc = false,  int lunghez
     canvas->SetFillColor(0);
     canvas->cd();
 
+    istogramma->GetXaxis()->SetTitle("s'[mm]");
+    istogramma->GetYaxis()->SetTitle("Numero di conteggi");
+
     if(multifunc == false)
     {
+        istogramma->SetTitle("Distribuzione primo set di misure");
         gauss->SetParameter(1,media);
-        istogramma->Draw();
+        istogramma->Draw("");
         istogramma->Fit(gauss,"R+");
         std::cout << "Fit gaussiano P=" << gauss->GetProb()<<endl<<endl;
     }
     else
     {
+        istogramma->SetTitle("Distribuzione secondo set di misure");
         multigauss1->SetParameter(1,1070);
         multigauss2->SetParameter(1,1045);
-        istogramma->Draw();
-        istogramma->Fit(multigauss1,"R+");
-        istogramma->Fit(multigauss2,"R+");
+        istogramma->Draw("");
+        istogramma->Fit(multigauss1,"0R+");
+        istogramma->Fit(multigauss2,"0R+");
 
         Double_t par[6];
         multigauss1->GetParameters(&par[0]);
