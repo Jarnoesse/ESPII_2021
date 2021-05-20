@@ -104,12 +104,12 @@ double Errore_Distanza_focale(double distanza_sorgente, double distanza_lente, d
 
 }
 
-void Metodo_Variazionale(double dati[],double risultati[],double distanze_lenti[], double distanza_sorgente, int lunghezza_array = 35, int lunghezza_array_2 = 7)
+void Metodo_Variazionale(double dati[],double distanze_lenti[], double distanza_sorgente,char nome[],double &focale,double &errore_focale,bool parte = false,int lunghezza_array = 35, int lunghezza_array_2 = 7)
 {
     double misure[lunghezza_array];
     double distanza_lenti[lunghezza_array_2];
 
-    for (int i=0; i < lunghezza_array; i++)misure[i] = dati[i] - 5;
+    for (int i=0; i < lunghezza_array; i++)misure[i] = dati[i] - 5;    //correggo per l'offset pure
     for( int i=0; i < lunghezza_array_2; i++) distanza_lenti[i] = distanze_lenti[i] + 5;
 
     double errori_distanza_lenti[lunghezza_array_2];                   // creo l'array di errori delle lenti prima di dimenticarmene
@@ -154,7 +154,7 @@ void Metodo_Variazionale(double dati[],double risultati[],double distanze_lenti[
 
 
     //Dichiaro il canvas
-    TCanvas *canvas = new TCanvas("Metodo_Variazionale","Metodo variazionale",200,10,600,400);
+    TCanvas *canvas = new TCanvas(nome,nome,200,10,600,400);
     canvas->SetFillColor(0);
     canvas->cd();
 
@@ -179,9 +179,34 @@ void Metodo_Variazionale(double dati[],double risultati[],double distanze_lenti[
 
     grafico->Fit(funzione,"RM+");
 
+    double p0 = funzione->GetParameter(0); // prendo il parametro e gli errori
+    double e0 = funzione->GetParError(0);
+
+
+
+    if(parte == false)
+    {
+        e0 = e0/pow(p0,2);
+        p0 = 1/p0;
+
+        std::cout << endl << "LA FOCALE DELLA LENTE BICONVESSA E'" << p0 << " +- " << e0 << " mm" endl;
+
+        focale = p0;
+        errore_focale = e0;
+
+    }
+    else
+    {
+
+        std::cout << "test" <<p0-1/focale;
+        double errore_risultato = sqrt(pow(1/(p0+1/focale),2)*pow(e0,2)+pow(1/pow(p0*focale+1,2),2)*pow(errore_focale,2));
+        double risultato = 1/(p0 - 1/focale);
+
+        std::cout << endl << "LA FOCALE DELLA LENTE BICONCAVA E'" << risultato << " +- " << errore_risultato << " mm" << endl;
+    }
 
 }
-void IsGaussian(double misure[],char nome[],bool multifunc = false, int lunghezza_array = 30, int nbins = 10)
+void IsGaussian(double misure[],char nome[],bool multifunc = false,  int lunghezza_array = 30, int nbins = 10)
 {
     double media = Media(misure);
 
@@ -225,58 +250,7 @@ void IsGaussian(double misure[],char nome[],bool multifunc = false, int lunghezz
         std::cout << "Fit gaussiano1 P=" << somma->GetProb()<<endl;
     }
 }
-/*
-void tStudent(int numeroEsperimenti, int neventi, const double & nbins = 40, const double& minb = -10, const double& maxb = 10) {
 
-  // valor vero e sigma
-  double valor_vero  = 235;
-  double sigma = 5;
-
-  // --------------------------------------------------------- //
-
-  // Generatore di eventi casuali (http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/ARTICLES/mt.pdf)
-  TRandom3 *random = new TRandom3();
-
-  double variabili_t[numeroEsperimenti];
-
-  // Referenza calcolo varianza in un passaggio: http://www.jstor.org/stable/1266577?seq=1#page_scan_tab_contents
-  for (int esp = 0; esp < numeroEsperimenti; ++esp){
-    double delta = 0.;
-    double media = 0.;
-    double M2    = 0.;
-    for (int i=0; i<neventi; ++i){
-      double d = random->Gaus(valor_vero,sigma);
-      delta = d - media;
-      media += delta/(i+1);
-      M2    += delta*(d-media);
-    }
-    double std = neventi > 1 ? sqrt(M2/(neventi-1)) : -9.;
-    variabili_t[esp] = (media - valor_vero)/(std/sqrt(neventi));
-    // Se anziché usare la deviazione standard campionaria si usasse la deviazione standard vera, allora t si distribuirebbe secondo la statistica di
-    // Gauss anche per poche misure. Per verificarlo, provare a usare la riga qui sotto anziché quella sopra.
-    // variabili_t[esp] = (media - valor_vero)/(sigma/sqrt(neventi));
-  }
-
-  TCanvas *ct = new TCanvas("t","t",200,10,600,400);
-  ct->cd();
-
-  // Istanza dell'oggetto istogramma (https://root.cern.ch/doc/master/classTH1F.html)
-  TH1F *htStudent = new TH1F("sStudent","tStudent",nbins, minb, maxb);
-  htStudent->SetStats(kFALSE);
-  htStudent->GetXaxis()->SetTitle("t");
-  htStudent->GetYaxis()->SetTitle("Conteggi");
-
-  for(int esp=0; esp<numeroEsperimenti;++esp)
-    htStudent->Fill(variabili_t[esp]);
-
-
-  htStudent->Draw();
-  htStudent->Fit("gaus","ME");
-  TF1 *fit = htStudent->GetFunction("gaus");
-  std::cout << "Chi^2:" << fit->GetChisquare() << ", number of DoF: " << fit->GetNDF() << " (Probability: " << fit->GetProb() << ")." << endl;
-}
-
-*/
 
 int Lenti_prima_parte()
 {
@@ -292,6 +266,9 @@ int Lenti_prima_parte()
 
    char nome1[] = {'I','s','t','o','g','r','a','m','m','a'}; // non mi da errore negli hist
    char nome2[] = {'S','e','c','o','n','d','o',};
+
+   char nome3[] = {'g','r','a','f','i','c','o','1'};
+   char nome4[] = {'g','r','a','f','i','c','o','2'};
 
    IsGaussian(Q1,nome1,false,30,8);
 
@@ -310,9 +287,10 @@ int Lenti_prima_parte()
     // SECONDA PARTE
     double Q3[] = {1081,1058,1062,1036,1081,  961,966,957,945,958,  864,874,864,895,881, 818,831,834,820,833,  784,801,787,807,794,  748,753,747,745,754,  725,727,728,725,728};
     double distanze_lenti[] = {410,415,420,425,430,440,450};
-    double risultati[2];
+    double focale_biconvessa;
+    double errore_focale_biconvessa;
 
-    Metodo_Variazionale(Q3,risultati,distanze_lenti,300);
+    Metodo_Variazionale(Q3,distanze_lenti,300,nome3,focale_biconvessa,errore_focale_biconvessa);
 
 
 
@@ -320,7 +298,7 @@ int Lenti_prima_parte()
     double Q4[] = {836,839,841,835,835,  810,821,822,823,810,  866,869,870,863,858,  891,889,888,892,885,  859,858,851,857,855,  1567,1504,1512,1545,1531,  828,829,824,828,828};
     double distanze_lenti_parte_2[] = {480,490,470,465,475,430,485};
 
-    Metodo_Variazionale(Q4,risultati,distanze_lenti_parte_2,300);
+    Metodo_Variazionale(Q4,distanze_lenti_parte_2,300,nome4,focale_biconvessa,errore_focale_biconvessa,true);
 
 
 
