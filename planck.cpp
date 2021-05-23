@@ -172,7 +172,7 @@ void planck(){
   double c = 2.99792458e8; // [m/s] velocità della luce nel vuoto (ambiente di estrazione elettronica in bulbo a vuoto)
   double e = 1.602e-19; // [C] carica dell'elettrone
   double Planck_const = 6.626e-34 / e; // [eV*s] valore di letteratura
-  double KEI = -4.3407; // [eV] -2.30 eV ???  energia di prima ionizzazione del potassio FORSE NON È QUELLO GIUSTO!!! vedi Wikipedia: https://it.wikipedia.org/wiki/Lavoro_di_estrazione#:~:text=Consideriamo,%20a%20titolo%20esemplificativo,%20il,67%20x%2010-19J
+  double KEI = -2.30; // [eV] (-4.3407 eV ??? dispense di Chiesa non considerate) energia di prima ionizzazione del potassio vedi Wikipedia: https://it.wikipedia.org/wiki/Lavoro_di_estrazione#:~:text=Consideriamo,%20a%20titolo%20esemplificativo,%20il,67%20x%2010-19J
 
   double f[nled] = {}; // [THz] frequenze led
   double ferr[nled] = {};
