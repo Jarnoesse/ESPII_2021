@@ -54,10 +54,33 @@ double_t max(int dim, double v[dim]){
 double semidispersione(int n, double v[n]){
   return (max(n,v) - min(n,v)) / 2.;
 }*/
-double testZ(double mu, double x, double s){
-  double Z = abs((x-mu)/s);
-  double pvalue = erfc(Z);
-  return pvalue;
+void Ztest(double x1,double x2, double err1, double err2, double alpha = 0.05){
+
+	double z = abs(x1 - x2) / sqrt(pow(err1, 2) + pow(err2, 2));  //definisco la variabile Z
+
+	double prob_z;
+	double pvalue_z;
+	prob_z = (ROOT::Math::normal_cdf(z,1,0) - 0.5)*2;
+	pvalue_z = (1-ROOT::Math::normal_cdf(z,1,0))*2;
+
+
+	if(pvalue_z > alpha){
+    cout 	<< "Test Z" << endl
+    << "alpha = " << alpha << endl
+		<< "Z = " << z << endl
+		<< "P(Z) = "<< prob_z << endl
+		<< "pvalue: "<< pvalue_z <<endl
+		<< "pvalue > alpha => H0 NON RIFIUTATA." << endl << endl;
+	}
+
+	if(pvalue_z <= alpha){
+		cout 	<< "Test Z" << endl
+    << "alpha = " << alpha << endl
+    << "Z = " << z << endl
+		<< "P(Z) = "<< prob_z << endl
+		<< "pvalue: "<< pvalue_z <<endl
+		<< "pvalue < alpha, H0 RIFIUTATA" << endl << endl;
+  }
 }
 
 void planck(){
@@ -172,7 +195,7 @@ void planck(){
   double c = 2.99792458e8; // [m/s] velocità della luce nel vuoto (ambiente di estrazione elettronica in bulbo a vuoto)
   double e = 1.602e-19; // [C] carica dell'elettrone
   double Planck_const = 6.626e-34 / e; // [eV*s] valore di letteratura
-  double KEI = -2.30; // [eV] (-4.3407 eV ??? dispense di Chiesa non considerate) energia di prima ionizzazione del potassio vedi Wikipedia: https://it.wikipedia.org/wiki/Lavoro_di_estrazione#:~:text=Consideriamo,%20a%20titolo%20esemplificativo,%20il,67%20x%2010-19J
+  double KEI = -2.30; // [eV] -4.3407 eV ???  energia di prima ionizzazione del potassio FORSE NON È QUELLO GIUSTO!!! vedi Wikipedia: https://it.wikipedia.org/wiki/Lavoro_di_estrazione#:~:text=Consideriamo,%20a%20titolo%20esemplificativo,%20il,67%20x%2010-19J
 
   double f[nled] = {}; // [THz] frequenze led
   double ferr[nled] = {};
@@ -210,26 +233,19 @@ void planck(){
 
   double h = Vc0f->GetParameter(1) * 1e-12; // [eV*s] costante di Planck ricavata
   double herr = Vc0f->GetParError(1) * 1e-12;
-  double U0 = Vc0f->GetParameter(0); // [eV] potenziale di arresto ottenuto
+  double U0 = Vc0f->GetParameter(0); // [eV] potenziale di arresto ottenuto (intercetta = W/e => W = intercetta [eV])
   double U0err = Vc0f->GetParError(0);
-
-  //test Z di compatibilità di h da letteratura
-  double pvalue_h = testZ(Planck_const, h, herr);
-  double pvalue_U0 = testZ(KEI, U0, U0err);
 
   cout << "Potenziale di arresto: "
        << "U0 = (" << U0 << " +- " << U0err << ") eV \n"
        << "Energia di prima ionizzazione del potassio: "
-       << "K.E.I. = " << KEI << " eV \n"
-       << "pvalue: " << pvalue_U0;
-  if (pvalue_U0 > 0.05) { cout << " H0 NON RIFIUTATA \n" << endl; }
-  else { cout << " H0 RIFIUTATA \n" << endl; }
+       << "K.E.I. = " << KEI << " eV \n";
+  Ztest(KEI, U0, 0.01, U0err);
+
 
   cout << "Costante di Planck: "
        << "h = (" << h << " +- " << herr << ") eV*s \n"
        << "Planck da letteratura: "
-       << "h = " << Planck_const << " eV*s \n"
-       << "pvalue: " << pvalue_h;
-  if (pvalue_h > 0.05) { cout << " H0 NON RIFIUTATA \n" << endl; }
-  else { cout << " H0 RIFIUTATA \n" << endl; }
+       << "h = " << Planck_const << " eV*s \n";
+  Ztest(Planck_const, h, 0., herr);
 }
