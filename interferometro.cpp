@@ -1,7 +1,7 @@
 // INTERFEROMETRO di MICHELSON-MORLEY
 /*Strumentazione:
 - palmer 1 micron
-- interferometro PASCO scientific Model OS-8501
+- interferometro PASCO scientific Model OS-8501 laser: 632.8 nm
 - goniometro 0.1°
 - spessore vetro
 - manometro 100 mbar
@@ -61,10 +61,39 @@ double mean(int n, double q[], double qerr[]){
 double semidispersione(int n, double v[n]){
   return (max(n,v) - min(n,v)) / 2.;
 }
-double testZ(double mu, double x, double s){
+double testZ(double mu, double x, double s){ // DA METTERE A POSTO!!!!
   double Z = abs((x-mu)/s);
-  double pvalue = erfc(Z);
+  double pvalue = erfc(Z) + 0.5; // ritrasformo in funzione di partazione
   return pvalue;
+}
+
+void Ztest(double x1,double x2, double err1, double err2, double alpha = 0.05){
+
+	double z = abs(x1 - x2) / sqrt(pow(err1, 2) + pow(err2, 2));  //definisco la variabile Z
+
+	double prob_z;
+	double pvalue_z;
+	prob_z = (ROOT::Math::normal_cdf(z,1,0) - 0.5)*2;
+	pvalue_z = (1-ROOT::Math::normal_cdf(z,1,0))*2;
+
+
+	if(pvalue_z > alpha){
+    cout 	<< "Test Z" << endl
+    << "alpha = " << alpha << endl
+		<< "Z = " << z << endl
+		<< "P(Z) = "<< prob_z << endl
+		<< "pvalue: "<< pvalue_z <<endl
+		<< "pvalue > alpha => H0 NON RIFIUTATA." << endl << endl;
+	}
+
+	if(pvalue_z <= alpha){
+		cout 	<< "Test Z" << endl
+    << "alpha = " << alpha << endl
+    << "Z = " << z << endl
+		<< "P(Z) = "<< prob_z << endl
+		<< "pvalue: "<< pvalue_z <<endl
+		<< "pvalue < alpha, H0 RIFIUTATA" << endl << endl;
+  }
 }
 
 /*double Media(double array[], int lunghezza_array){
@@ -118,7 +147,7 @@ void interferometro(){
   double n[N] = {}; // indice di rifrazione
   double nerr[N] = {};
   lambda_mean = lambda_mean * 1e-9; // in [m]
-  lambda_mean_err = lambda_mean_err * 1e-9;
+  lambda_mean_err = /*lambda_mean_err*/ 25. * 1e-9;
   for (int i = 0; i < N; ++i){
     ang[i] = degtorad(ang[i]); // tutte misure angolari in randianti
     angerr[i] = degtorad(0.1);
@@ -183,15 +212,20 @@ void interferometro(){
   double Nperr = mp->GetParError(1);
   double np = Np * lambda_mean / (2 * d);
   double nperr = sqrt(pow(Nperr * lambda_mean / (2 * d), 2) + pow(Np * lambda_mean_err / (2 * d), 2) + pow(derr * Np * lambda_mean / (2 * d*d), 2));
-  double nA = 1. + np * p0; // n(p) = n(0) + dn/dp * p and n(0) = 1 <=> vacuum index
-  double nAerr = sqrt(pow(nperr * p0, 2) + pow(np * 1e-3, 2));
+  double nA = 1. + np * pA; // n(p) = n(0) + dn/dp * p and n(0) = 1 <=> vacuum index
+  double nAerr = sqrt(pow(nperr * pA, 2) + pow(np * 1e-3, 2)); // modificato
   double nA_teo = 1.000269;
   cout << "indice di rifrazione dell'aria a 1 atm: "
        << "n = (" << nA << " +- " << nAerr << ") \n"
        << "indice di rifrazione dell'aria a pressione standard e lambda 589.3 nm: "  << setprecision(10) << nA_teo << endl;
 
   // test Z di compatibilità per nA con nA_teo
+  Ztest(nA_teo, nA, 0., nAerr);
+
+  /*
   double pvalue_nA = testZ(nA_teo, nA, nAerr);
-  if (pvalue_nA > 0.05) { cout << "COMPATIBILI \n" << endl; }
-  else { cout << "NON COMPATIBILI \n" << endl; }
+  cout << "pvalue: " << pvalue_nA;
+  if (pvalue_nA > 0.05) { cout << " COMPATIBILI \n" << endl; }
+  else { cout << " NON COMPATIBILI \n" << endl; }*/
+  
 }
