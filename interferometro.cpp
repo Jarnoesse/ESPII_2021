@@ -38,7 +38,7 @@ double_t min(int dim, double v[dim]){
 	//else continue;
   }
   double_t result = v[min_index];
-  return result;}//funzioni per trovare elemento minimo e massimo di un array
+  return result;} // funzioni per trovare elemento minimo e massimo di un array
 double_t max(int dim, double v[dim]){
   int max_index = 0;
   for (int i = 0; i < dim; ++i){
@@ -61,54 +61,34 @@ double mean(int n, double q[], double qerr[]){
 double semidispersione(int n, double v[n]){
   return (max(n,v) - min(n,v)) / 2.;
 }
-double testZ(double mu, double x, double s){ // DA METTERE A POSTO!!!!
-  double Z = abs((x-mu)/s);
-  double pvalue = erfc(Z) + 0.5; // ritrasformo in funzione di partazione
-  return pvalue;
-}
-
 void Ztest(double x1,double x2, double err1, double err2, double alpha = 0.05){
 
-	double z = abs(x1 - x2) / sqrt(pow(err1, 2) + pow(err2, 2));  //definisco la variabile Z
+  double z = abs(x1 - x2) / sqrt(pow(err1, 2) + pow(err2, 2));  //definisco la variabile Z
 
-	double prob_z;
-	double pvalue_z;
-	prob_z = (ROOT::Math::normal_cdf(z,1,0) - 0.5)*2;
-	pvalue_z = (1-ROOT::Math::normal_cdf(z,1,0))*2;
+  double prob_z;
+  double pvalue_z;
+  prob_z = (ROOT::Math::normal_cdf(z,1,0) - 0.5)*2;
+  pvalue_z = (1-ROOT::Math::normal_cdf(z,1,0))*2;
 
 
-	if(pvalue_z > alpha){
-    cout 	<< "Test Z" << endl
-    << "alpha = " << alpha << endl
-		<< "Z = " << z << endl
-		<< "P(Z) = "<< prob_z << endl
-		<< "pvalue: "<< pvalue_z <<endl
-		<< "pvalue > alpha => H0 NON RIFIUTATA." << endl << endl;
-	}
+  if(pvalue_z > alpha){
+  cout << "Test Z" << endl
+       << "alpha = " << alpha << endl
+       << "Z = " << z << endl
+       << "P(Z) = "<< prob_z << endl
+       << "pvalue: "<< pvalue_z <<endl
+       << "pvalue > alpha => H0 NON RIFIUTATA." << endl << endl;
+  }
 
-	if(pvalue_z <= alpha){
-		cout 	<< "Test Z" << endl
-    << "alpha = " << alpha << endl
-    << "Z = " << z << endl
-		<< "P(Z) = "<< prob_z << endl
-		<< "pvalue: "<< pvalue_z <<endl
-		<< "pvalue < alpha, H0 RIFIUTATA" << endl << endl;
+  if(pvalue_z <= alpha){
+  cout << "Test Z" << endl
+       << "alpha = " << alpha << endl
+       << "Z = " << z << endl
+       << "P(Z) = "<< prob_z << endl
+       << "pvalue: "<< pvalue_z <<endl
+       << "pvalue < alpha, H0 RIFIUTATA" << endl << endl;
   }
 }
-
-/*double Media(double array[], int lunghezza_array){
-  double media = 0;
-  if (lunghezza_array == 0) {lunghezza_array = *(&array + 1) - array;} // questo if è stato aggiunto per problemi nel chiamare questa funzione in Varianza
-  for (int i = 0; i < lunghezza_array; i++) {media = media + array[i];}
-  media = media / lunghezza_array;
-  return media;} //Calcola la Media degli elementi degli array
-double Varianza(double array[], int lunghezza_array){ //Calcola la varianza dato un array
-  double varianza = 0;
-  double media = Media(array,lunghezza_array);
-  for (int i = 0; i < lunghezza_array; i++) {varianza = varianza + pow(array[i]-media,2);}
-  varianza = varianza / (lunghezza_array-1);
-  return varianza;
-}*/
 
 
 void interferometro(){
@@ -178,35 +158,42 @@ void interferometro(){
   double perr[N] = {};
   double merr[N] = {};
   for (int i = 0; i < N; ++i){
-    //p[i] += p0; // pressione NON differenziale
+    p[i] += p0; // pressione NON differenziale
     perr[i] = 0.1;
     merr[i] = 0.;
   }
 
   //GRAFICO m(p)
-	TCanvas* cmp = new TCanvas("cmp", "cmp", 200, 10, 600, 400);
-	cmp->SetFillColor(0);
+  TCanvas* cmp = new TCanvas("cmp", "cmp", 200, 10, 600, 400);
+  cmp->SetFillColor(0);
   cmp->SetGrid();
-	cmp->cd();
-	TGraphErrors* gmp = new TGraphErrors(N, p, m, perr, merr);
-	gmp->SetMarkerSize(0.6);
-	gmp->SetMarkerStyle(21);
-	gmp->SetTitle("m(p)");
-	gmp->GetXaxis()->SetTitle("p [bar]");
-	gmp->GetYaxis()->SetTitle("m [numero frange]");
-	gmp->Draw("AP");
+  cmp->cd();
+  TGraphErrors* gmp = new TGraphErrors(N, p, m, perr, merr);
+  gmp->SetMarkerSize(0.6);
+  gmp->SetMarkerStyle(21);
+  gmp->SetTitle("m(p)");
+  gmp->GetXaxis()->SetTitle("p [bar]");
+  gmp->GetYaxis()->SetTitle("m [numero frange]");
+  gmp->Draw("AP");
 
   //FIT m = pol1(p)
-	TF1* mp = new TF1("mp", "[0] + [1]*x", min(N, p), max(N, p));
-	mp->SetParameter(0, 5); // da settare meglio...
-	mp->SetParameter(1, 1);
-	//mp->SetParLimits(0, 0, );
-	//mp->SetParLimits(1, 0, 1);
-	mp->SetLineColor(2);
-	gmp->Fit(mp, "RMS+");
-	cmp->Print("nfrange_pressione.png");
+  TF1* mp = new TF1("mp", "[0] + [1]*x", min(N, p), max(N, p));
+  mp->SetParameter(0, 5); // da settare meglio...
+  mp->SetParameter(1, 1);
+  //mp->SetParLimits(0, 0, );
+  //mp->SetParLimits(1, 0, 1);
+  mp->SetLineColor(2);
+  gmp->Fit(mp, "RMS+");
 
-	cout << "Chi^2: " << mp->GetChisquare() << ", number of DoF: " << mp->GetNDF() << " (Probability: " << mp->GetProb() << ")." << endl;
+  TLegend* leg = new TLegend(0.138,0.63,0.428,0.88);
+  //leg->SetHeader("Legenda");
+  leg->AddEntry(gmp, "punti sperimentali", "pe");
+  leg->AddEntry(mp, "fit: m #propto p", "l");
+  leg->Draw();
+
+  cmp->Print("nfrange_pressione.png");
+
+  cout << "Chi^2: " << mp->GetChisquare() << ", number of DoF: " << mp->GetNDF() << " (Probability: " << mp->GetProb() << ")." << endl;
 
   double Np = mp->GetParameter(1);
   double Nperr = mp->GetParError(1);
@@ -216,16 +203,10 @@ void interferometro(){
   double nAerr = sqrt(pow(nperr * pA, 2) + pow(np * 1e-3, 2)); // modificato
   double nA_teo = 1.000269;
   cout << "indice di rifrazione dell'aria a 1 atm: "
-       << "n = (" << nA << " +- " << nAerr << ") \n"
+       << "n = (" << setprecision(10) << nA << " +- " << nAerr << ") \n"
        << "indice di rifrazione dell'aria a pressione standard e lambda 589.3 nm: "  << setprecision(10) << nA_teo << endl;
 
   // test Z di compatibilità per nA con nA_teo
   Ztest(nA_teo, nA, 0., nAerr);
 
-  /*
-  double pvalue_nA = testZ(nA_teo, nA, nAerr);
-  cout << "pvalue: " << pvalue_nA;
-  if (pvalue_nA > 0.05) { cout << " COMPATIBILI \n" << endl; }
-  else { cout << " NON COMPATIBILI \n" << endl; }*/
-  
 }
