@@ -91,8 +91,8 @@ void polaris(){
     alfamean[i] = mean(n, alfa[i], alfaerr[i]);
     alfamean_err[i] = alfaerr[0][0]; // invarianza sotto propagazione degli errori di media aritmetica
 
-    rho[i] = l[i] * alfamean[i] / prs[i];
-    rhoerr[i] = sqrt(pow(lerr[i] * alfamean[i] / prs[i], 2) + pow(l[i] * alfamean_err[i] / prs[i], 2) + pow(l[i] * alfamean[i] * prs_err / (prs[i]*prs[i]), 2));
+    rho[i] = alfamean[i] / (l[i] * prs[i]);
+    rhoerr[i] = sqrt(pow(lerr[i] * alfamean[i] / (l[i] *l[i] *prs[i]), 2) + pow(alfamean_err[i] / (l[i] * prs[i]), 2) + pow(alfamean[i] * prs_err / (l[i] * prs[i]*prs[i]), 2));
 
     //PRINT
     cout << "Campione: " << sostanza[i]
