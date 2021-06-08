@@ -252,7 +252,7 @@ int ParteII(Prisma classe[],Reticolo reticolo[], double gradi[],double primi[],i
 
     TCanvas *canvas       = new TCanvas("Indice di Rifrazione del vetro in funzione della frequenza","Indice di Rifrazione del vetro in funzione della frequenza",200,10,600,400);
     TGraphErrors *grafico = new TGraphErrors(n_linee,lunghezze_onda,indici,errori_lunghezze_onda,errori_indici);
-    TF1 *funzione         = new TF1("funzione","[0]+[1]/(x^2)+[2]/(x^4)",400,700);
+    TF1 *funzione         = new TF1("funzione","[0]+[1]/(x^2)",400,700);
     funzione->SetParameter(0,1.6700);
     funzione->SetParameter(1,743);
     Grafico(canvas,grafico,funzione);
