@@ -62,6 +62,7 @@ void Grafico(TCanvas *canvas,TGraphErrors *grafico,TF1 *funzione)
     canvas->SetFillColor(0);
     canvas->cd();
 
+    std::cout << "--------FIT IN CORSO ------" << endl;
     grafico->SetMarkerStyle(8);
     grafico->SetMarkerSize(1);
     grafico->SetTitle("Indice di Rifrazione del vetro");
@@ -149,8 +150,16 @@ public:
             angolo[i] = 360 - gradi[i] - primi[i]/60;
             angolo[i] = angolo[i] * 3.14/180;
         }
+
+        double errore = 3.14; //questo messo perchè root non sa fare i conti
+        errore = errore/60;
+        errore = errore * 3.14;
+        errore = errore/180;
+
         angolo_deviazione_minima.valore = Media(angolo,lunghezza_array);
-        angolo_deviazione_minima.errore = Varianza(angolo,lunghezza_array);
+        angolo_deviazione_minima.errore = errore;
+
+        if (Varianza(angolo,lunghezza_array) > angolo_deviazione_minima.errore)angolo_deviazione_minima.errore = Varianza(angolo,lunghezza_array);
 
         std::cout << nome << " " << angolo_deviazione_minima.valore << " pm " << angolo_deviazione_minima.errore << endl << endl;
 
@@ -243,12 +252,44 @@ int ParteII(Prisma classe[],Reticolo reticolo[], double gradi[],double primi[],i
 
     TCanvas *canvas       = new TCanvas("Indice di Rifrazione del vetro in funzione della frequenza","Indice di Rifrazione del vetro in funzione della frequenza",200,10,600,400);
     TGraphErrors *grafico = new TGraphErrors(n_linee,lunghezze_onda,indici,errori_lunghezze_onda,errori_indici);
-    TF1 *funzione         = new TF1("funzione","[0]+[1]/(x^2)",400,700);
+    TF1 *funzione         = new TF1("funzione","[0]+[1]/(x^2)+[2]/(x^4)",400,700);
     funzione->SetParameter(0,1.6700);
     funzione->SetParameter(1,743);
     Grafico(canvas,grafico,funzione);
 
     return 0;
+}
+
+int PlottaOnde(Reticolo reticolo[],int n_linee)
+{
+    n_linee = n_linee +1;
+    double valore_linea[n_linee];
+    double errore_linea[n_linee];
+    double y[n_linee];
+    double err_y[n_linee];
+
+
+    for(int i=0;i<n_linee;i++)
+    {
+        valore_linea[i] = reticolo[i].lunghezza_onda.valore;
+        errore_linea[i] = reticolo[i].lunghezza_onda.errore;
+        y[i] = 1;
+        err_y[i] = 0;
+        std::cout <<"TEST " << reticolo[i].lunghezza_onda.valore << " +- " << reticolo[i].lunghezza_onda.valore << endl << endl;
+    }
+    TCanvas *canvas2       = new TCanvas("Linee","Linee",200,10,600,400);
+    TGraphErrors *grafico2 = new TGraphErrors(n_linee,valore_linea,y,errore_linea,err_y);
+
+    grafico2->SetMarkerStyle(8);
+    grafico2->SetMarkerSize(1);
+    grafico2->SetTitle("Linee di emissione");
+    grafico2->GetXaxis()->SetTitle("Lunghezza d'onda [nm]");
+
+    grafico2->Draw("AP");
+
+    return 0;
+
+
 }
 
 
@@ -276,6 +317,9 @@ double Spettroscopio()
     double primi[] = {46,58,51,19, 43,44,45, 50,49,49, 30,30,30, 49,48,49, 10,11,11}; //maggiore errrore nella prima riconducibile al mio occhio che non si era ancora abituato?
 
     ParteII(LineaII,LineaI,gradi,primi,lunghezze_array,n_linee,nomiII);
+
+
+    PlottaOnde(LineaI,n_linee);
 
 
 
