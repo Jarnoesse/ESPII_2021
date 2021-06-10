@@ -118,11 +118,11 @@ void interferometro(){
   //-------------------------------------------------------------------------------------------------------------------------------------------
 
   // 2. INDICE di RIFRAZIONE del vetro
-  const int N = 9; // numero di misure
+  const int N = 6; // numero di misure
   frange = 50;
   double d = 5.66e-3; // [m] spessore vetro da palmer
   double derr = 0.05;
-  double ang[] = {6.0, 3.0, 5.4, 7.0, 6.6, 7.0, 6.9, 6.9, 7.1}; // [deg] inclinazione vetro su cammino ottico
+  double ang[] = {7.0, 6.6, 7.0, 6.9, 6.9, 7.1}; // [deg] inclinazione vetro su cammino ottico
   double angerr[N] = {};
   double n[N] = {}; // indice di rifrazione
   double nerr[N] = {};
