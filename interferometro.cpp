@@ -131,8 +131,8 @@ void interferometro(){
   for (int i = 0; i < N; ++i){
     ang[i] = degtorad(ang[i]); // tutte misure angolari in randianti
     angerr[i] = degtorad(0.1);
-    n[i] = (d - lambda_mean * N/2.) * (1. - cos(ang[i])) / (d * (1. - cos(ang[i])) - (lambda_mean * N/2.));
-    nerr[i] = sqrt(pow(N,2) * 4 * (pow(lambda_mean * derr,2) + pow(d * lambda_mean_err ,2)) * pow((cos(ang[i]) - 1) * cos(ang[i]),2) + pow(lambda_mean * (N * lambda_mean - 2*d) * angerr[i] * sin(ang[i]),2)) / pow(N * lambda_mean - 2*d + 2*d*cos(ang[i]),2);
+    n[i] = (d - lambda_mean * frange/2.) * (1. - cos(ang[i])) / (d * (1. - cos(ang[i])) - (lambda_mean * frange/2.));
+    nerr[i] = sqrt(pow(frange,2) * 4 * (pow(lambda_mean * derr,2) + pow(d * lambda_mean_err ,2)) * pow((cos(ang[i]) - 1) * cos(ang[i]),2) + pow(lambda_mean * (frange * lambda_mean - 2*d) * angerr[i] * sin(ang[i]),2)) / pow(frange * lambda_mean - 2*d + 2*d*cos(ang[i]),2);
   }
 
   // analisi statistica di n
